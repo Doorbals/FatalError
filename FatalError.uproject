@@ -13,7 +13,8 @@
 				"GameplayAbilities",
 				"EnhancedInput",
 				"CoreUObject",
-				"AIModule"
+				"AIModule",
+				"UMG"
 			]
 		}
 	],
@@ -32,6 +33,10 @@
 		{
 			"Name": "MotionWarping",
 			"Enabled": true
+		},
+		{
+			"Name": "UdpMessaging",
+			"Enabled": false
 		}
 	]
 }

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GenericTeamAgentInterface.h"
 #include "GameFramework/PlayerController.h"
 #include "Character/FECharacterBase.h"
 #include "FEPlayerController.generated.h"
@@ -11,9 +12,15 @@
  * 
  */
 UCLASS()
-class FATALERROR_API AFEPlayerController : public APlayerController
+class FATALERROR_API AFEPlayerController : public APlayerController, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
+	
+public:
+	AFEPlayerController();
+	FGenericTeamId TeamId;
+	virtual FGenericTeamId GetGenericTeamId() const override;
+
 protected:
 
 	// Server only

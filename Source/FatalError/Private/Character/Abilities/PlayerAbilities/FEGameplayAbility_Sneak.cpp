@@ -35,7 +35,7 @@ bool UFEGameplayAbility_Sneak::CanActivateAbility(const FGameplayAbilitySpecHand
 	}
 	
 	const AFEPlayerCharacter* Character = CastChecked<AFEPlayerCharacter>(ActorInfo->AvatarActor.Get());
-	return !Character->bIsSneak;
+	return !Character->bIsSneak && Character->MovementState == EFEMovementState::Grounded;
 }
 
 void UFEGameplayAbility_Sneak::InputReleased(const FGameplayAbilitySpecHandle Handle,
@@ -54,5 +54,8 @@ void UFEGameplayAbility_Sneak::CancelAbility(const FGameplayAbilitySpecHandle Ha
 	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
 
 	AFEPlayerCharacter* Character = CastChecked<AFEPlayerCharacter>(ActorInfo->AvatarActor.Get());
-	Character->EndSneak();
+	if(Character->bIsSneak)
+	{
+		Character->EndSneak();
+	}
 }

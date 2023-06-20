@@ -6,6 +6,16 @@
 #include "Character/Abilities/FEAbilitySystemComponent.h"
 #include "Player/FEPlayerState.h"
 
+AFEPlayerController::AFEPlayerController()
+{
+	TeamId = 0;
+}
+
+FGenericTeamId AFEPlayerController::GetGenericTeamId() const
+{
+	return TeamId;
+}
+
 // 플레이어 컨트롤러가 새로운 Pawn을 소유할 때 호출된다. 일반적으로 플레이어 컨트롤러와 관련된 작업 초기화에 사용된다.
 void AFEPlayerController::OnPossess(APawn* InPawn)
 {

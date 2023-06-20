@@ -32,3 +32,31 @@ enum class EFEMovementState : uint8
 	Sneak			UMETA(DisplayName = "Sneak"),
 	Climb			UMETA(DisplayName = "Climb"),
 };
+
+UENUM(BlueprintType)
+enum class EFEDetectState : uint8
+{
+	None,
+	Green,
+	Yellow,
+	Orange,
+	Red
+};
+
+UENUM(BlueprintType)
+enum class EFEAIAnimState : uint8
+{
+	Idle,
+	Walk,
+	CrouchWalk,
+	Run,
+	TurnLeft,
+	TurnRight,
+	SuddenTurnLeft,
+	SuddenTurnRight,
+	Afraid,
+	LookAround,
+	Seek,
+	PushAlert
+};
+ 

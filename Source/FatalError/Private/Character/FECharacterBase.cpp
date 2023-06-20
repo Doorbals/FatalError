@@ -15,7 +15,7 @@ AFECharacterBase::AFECharacterBase(const FObjectInitializer& ObjectInitializer)
 {
 	// 해당 액터가 틱 처리를 할 수 있는지 여부 설정.
 	PrimaryActorTick.bCanEverTick = false;
-
+ 
 	// 액터의 캡슐 컴포넌트가 ECC_Visibility 채널과 상호작용할 때 Overlap 형태의 충돌 응답 하도록 설정
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Overlap);
 	// 서버에서 항상 관련된 상태 유지. false일 경우 클라이언트에서만 유지. (멀티플레이어 게임에서 사용되는 듯?)
@@ -58,7 +58,7 @@ void AFECharacterBase::RemoveCharacterAbilities()
 	{
 		// 어빌리티의 소스 오브젝트가 현재 캐릭터인지 확인(여러 캐릭터가 하나의 어빌리티 공유하는 경우 해당 캐릭터 어빌리티만 제거하기 위함)
 		if ((Spec.SourceObject == this) && CharacterAbilities.Contains(Spec.Ability->GetClass()))
-		{
+		{ 
 			AbilitiesToRemove.Add(Spec.Handle);
 		}
 	}

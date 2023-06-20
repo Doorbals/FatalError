@@ -5,17 +5,20 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Character/FECharacterBase.h"
-#include "Input/FEInputConfig.h"
 #include "InputActionValue.h"
-#include "InputMappingContext.h"
 #include "FatalError/FatalError.h"
+#include "Perception/AISightTargetInterface.h"
 #include "FEPlayerCharacter.generated.h"
 
 /**
  * 
  */
+
+// FEAIController 클래스에서 타겟의 Location을 사용하기 위한 델리게이트
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAIPerceptionTargetOnUpdated, const FVector&, TargetLocation);
+
 UCLASS()
-class FATALERROR_API AFEPlayerCharacter : public AFECharacterBase
+class FATALERROR_API AFEPlayerCharacter : public AFECharacterBase, public IAISightTargetInterface
 {
 	GENERATED_BODY()
 
@@ -26,15 +29,11 @@ public:
 
 	virtual void PossessedBy(AController* NewController) override;
 
+	virtual bool CanBeSeenFrom(const FVector& ObserverLocation, FVector& OutSeenLocation, int32& NumberOfLoSChecksPerformed, float& OutSightStrength, const AActor* IgnoreActor, const bool* bWasVisible, int32* UserData) override;
+	
 	class USpringArmComponent* GetCameraBoom();
 
 	class UCameraComponent* GetFollowCamera();
-
-	UFUNCTION(BlueprintCallable, Category = "Camera")
-	float GetStartingCameraBoomArmLength();
-
-	UFUNCTION(BlueprintCallable, Category = "Camera")
-	FVector GetStartingCameraBoomLocation();
 
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Camera")
@@ -43,20 +42,14 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Camera")
 	float BaseLookUpRate = 45.0f;
 
-	UPROPERTY(BlueprintReadOnly, Category = "GASDocumentation|Camera")
-	float StartingCameraBoomArmLength;
-
-	UPROPERTY(BlueprintReadOnly, Category = "GASDocumentation|Camera")
-	FVector StartingCameraBoomLocation;
-
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "GASDocumentation|Camera")
 	class USpringArmComponent* CameraBoom;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "GASDocumentation|Camera")
 	class UCameraComponent* FollowCamera;
 
-	bool ASCInputBound = false;
-
+	float BaseCapsuleHalfHeight = 88.0f;
+	
 	FGameplayTag DeadTag;
 	
 	virtual void BeginPlay() override;
@@ -65,6 +58,10 @@ protected:
 	
 	void Move(const FInputActionValue& Value);
 
+	void SneakMove(const FInputActionValue& Value);
+
+	void ClimbMove(const FInputActionValue& Value);
+	
 	void StopMove(const FInputActionValue& Value);
 	
 	void Look(const FInputActionValue& Value);
@@ -73,19 +70,21 @@ protected:
 
 	void Input_AbilityInputTagReleased(FGameplayTag InputTag);
 	
-	virtual void OnRep_PlayerState() override;
-
-	// 잠재적인 race Condition을 처리하기 위해 SetupPlayerInputComponent와 OnRep_PlayerState 양쪽에서 모두 호출된다. because of a potential race condition where the PlayerController might
-	// PlayerController가 ClientRestart를 호출하고, 이로 인해 PlayerState가 클라이언트로 리플리케이트 되기 전에 SetupPlayerInputComponent가 호출될 수 있으므로, SetupPlayerInputComponent에서 PlayerState가 null이 될 수 있다.
-	// 반대로, PlayerController가 ClientRestart를 호출하기 전에 PlayerState가 리플리케이트 되는 경우, OnRep_PlayerState에서 Actor의 InputComponent가 null이 될 수 있다. (즉, InputComponent가 PlayerController에서 설정되기 전에 PlayerState가 설정되는 경우)
-	void BindASCInput();
-	
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
-	UFEInputConfig* InputConfig;
+	class UFEInputConfig* InputConfig;
 	
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
-	UInputMappingContext* InputMapping;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	class UInputMappingContext* InputMapping;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	class UInputMappingContext* SneakInputMapping;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	class UInputMappingContext* ClimbInputMapping;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "MotionWarping")
+	TObjectPtr<class UMotionWarpingComponent> MotionWarpingComponent;
 
 	UFUNCTION(BlueprintCallable)
 	void SetControlMode(EFEMovementState InMovementState);
@@ -105,20 +104,17 @@ public:
 	void SneakTrace(float InMoveRight, float InMoveForward);
 
 	UPROPERTY(BlueprintReadOnly)
-	bool bIsSneak = false;
+	bool bIsSneak;
 
 	UPROPERTY(BlueprintReadOnly)
-	bool bSneakRight = true;
+	bool bSneakRight;
 
 	UPROPERTY(BlueprintReadWrite)
 	EFEMovementState MovementState;
 
 	UPROPERTY(BlueprintReadWrite)
 	float MovingLeftRight;
-
-	UPROPERTY(BlueprintReadWrite)
-	float MovingUpDown;
-
+	
 	UPROPERTY(BlueprintReadWrite)
 	bool bCanMoveRight;
 	
@@ -127,4 +123,9 @@ public:
 	
 	UPROPERTY(BlueprintReadWrite)
 	FVector WorldDirection;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bMovementEnabled;
+	
+	FAIPerceptionTargetOnUpdated TargetOnUpdated;
 };

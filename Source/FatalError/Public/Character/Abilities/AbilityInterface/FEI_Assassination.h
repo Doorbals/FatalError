@@ -22,5 +22,5 @@ class FATALERROR_API IFEI_Assassination
 	
 public:
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
-	void StalthBackAssassinate(FVector& Location, FRotator& Rotation);
+	void Assassinated(FVector& Location, FRotator& Rotation);
 };

@@ -17,6 +17,8 @@ void FFEGameplayTags::InitializeNativeTags()
 void FFEGameplayTags::AddAllTags(UGameplayTagsManager& Manager)
 {
 	AddTag(InputTag_Move, "Input.Move", "Move input.");
+	AddTag(InputTag_SneakMove, "Input.SneakMove", "SneakMove input.");
+	AddTag(InputTag_ClimbMove, "Input.ClimbMove", "ClimbMove input.");
 	AddTag(InputTag_Look, "Input.Look", "Look input.");
 	AddTag(InputTag_Crouch, "Input.Crouch", "Crouch input.");
 	AddTag(InputTag_Jump, "Input.Ability.Jump", "Jump input");

@@ -3,12 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FEAICharacterInterface.h"
 #include "GameFramework/Character.h"
 #include "FEAICharacterBase.generated.h"
 
 UCLASS()
-class FATALERROR_API AFEAICharacterBase : public ACharacter, public IFEAICharacterInterface
+class FATALERROR_API AFEAICharacterBase : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -27,14 +26,4 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-protected:
-	virtual float GetAIPatrolRadius() override;
-	virtual float GetAIDecentRange() override;
-	virtual float GetAIAttackRange() override;
-	virtual float GetAITurnSpeed() override;
-
-	virtual void SetAIAttackDelegate(const FAICharacterAttackFinished& InOnAttackFinished) override;
-	virtual void AttackByAI() override;
-	void NotifyComboActionEnd();
-	FAICharacterAttackFinished OnAttackFinished;
 };

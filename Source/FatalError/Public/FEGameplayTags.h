@@ -16,6 +16,8 @@ public:
 	static void InitializeNativeTags();
 	
 	FGameplayTag InputTag_Move;
+	FGameplayTag InputTag_SneakMove;
+	FGameplayTag InputTag_ClimbMove;
 	FGameplayTag InputTag_Look;
 	FGameplayTag InputTag_Jump;
 	FGameplayTag InputTag_Crouch;
