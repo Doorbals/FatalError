@@ -7,6 +7,7 @@
 #include "Character/Abilities/AttributeSet/FEAttributeSetBase.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 class UFEGameplayAbility;
 
@@ -18,7 +19,7 @@ AFECharacterBase::AFECharacterBase(const FObjectInitializer& ObjectInitializer)
  
 	// 액터의 캡슐 컴포넌트가 ECC_Visibility 채널과 상호작용할 때 Overlap 형태의 충돌 응답 하도록 설정
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Overlap);
-	// 서버에서 항상 관련된 상태 유지. false일 경우 클라이언트에서만 유지. (멀티플레이어 게임에서 사용되는 듯?)
+	// 서버에서 항상 관련된 상태 유지. false일 경우 클라이언트에서만 유지. (멀티플레이어 게임에서 사용)
 	bAlwaysRelevant = true;
 
 	// RequestGameplayTag()로 게임플레이 태그를 생성하여 변수에 할당
@@ -136,6 +137,7 @@ float AFECharacterBase::GetMoveSpeedBaseValue() const
 // 캐릭터가 죽었을 때 실행
 void AFECharacterBase::Die()
 {
+	UE_LOG(LogTemp, Log, TEXT("die"));
 	// 캐릭터의 어빌리티 모두 제거
 	RemoveCharacterAbilities();
 
@@ -160,7 +162,7 @@ void AFECharacterBase::Die()
 		AbilitySystemComponent->AddLooseGameplayTag(DeadTag);
 	}
 
-	// 설정된 사망 애니메이션 몽타주 있는 경우 실행, 아니면 Destroy
+	// 설정된 사망 애니메이션 몽타주 있는 경우 실행
 	if (DeathMontage)
 	{
 		PlayAnimMontage(DeathMontage);
@@ -173,7 +175,13 @@ void AFECharacterBase::Die()
 
 void AFECharacterBase::FinishDying()
 {
-	Destroy();
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetMesh()->SetSimulatePhysics(true);
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]
+	{
+		UGameplayStatics::OpenLevel(GetWorld(), FName("StartLevel"));
+	}, 5.0f, false);
 }
 
 // Called when the game starts or when spawned
@@ -221,8 +229,7 @@ void AFECharacterBase::InitializeAttributes()
 	// EffectContext(게임 플레이 이펙트와 관련된 정보 저장)를 생성하고, 그 소스 오브젝트를 현재 캐릭터 객체로 지정
 	FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
 	EffectContext.AddSourceObject(this);
-
-	// 이 부분 잘 모르겠다!
+	
 	FGameplayEffectSpecHandle NewHandle = AbilitySystemComponent->MakeOutgoingSpec(DefaultAttributes, 0, EffectContext);
 	if (NewHandle.IsValid())
 	{
@@ -237,8 +244,7 @@ void AFECharacterBase::AddStartupEffects()
 	{
 		return;
 	}
-
-	// 이 부분도 잘 모르겠다..!
+	
 	FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
 	EffectContext.AddSourceObject(this);
 

@@ -24,6 +24,14 @@ void UFEAttributeSetBase::PreAttributeChange(const FGameplayAttribute& Attribute
 	{
 		AdjustAttributeForMaxChange(Energy, MaxEnergy, NewValue, GetEnergyAttribute());
 	}
+	else if(Attribute == GetHealthAttribute())
+	{
+		NewValue = FMath::Clamp<float>(NewValue, 0, MaxHealth.GetBaseValue());
+	}
+	else if(Attribute == GetEnergyAttribute())
+	{
+		NewValue = FMath::Clamp<float>(NewValue, 0, MaxEnergy.GetCurrentValue());
+	}
 	else if (Attribute == GetMoveSpeedAttribute())
 	{
 		// 이동 속도는 150보다 낮을 수 없고, 1000보다 높을 수 없도록 클램프한다.
@@ -40,8 +48,6 @@ void UFEAttributeSetBase::PreAttributeChange(const FGameplayAttribute& Attribute
 void UFEAttributeSetBase::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
 {
 	Super::PostGameplayEffectExecute(Data);
-
-	
 }
 
 void UFEAttributeSetBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

@@ -7,6 +7,7 @@
 #include "Animation/FEAIAnimInstance.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
+#include "Kismet/KismetMathLibrary.h"
 
 UBTT_ChangeAnimState::UBTT_ChangeAnimState()
 {
@@ -29,6 +30,7 @@ EBTNodeResult::Type UBTT_ChangeAnimState::ExecuteTask(UBehaviorTreeComponent& Ow
 			{
 				AIAnimInstance->AnimState = SetAIAnimState;
 				MyBlackboard->SetValueAsEnum(FName("CurrentAnimState"), static_cast<uint8>(SetAIAnimState));
+				AIAnimInstance->RandomNumber = UKismetMathLibrary::RandomInteger(3);
 			}
 			Result = EBTNodeResult::Succeeded;
 		}

@@ -57,7 +57,7 @@ public:
 	// Gets the Base value of MoveSpeed
 	UFUNCTION(BlueprintCallable, Category = "FECharacter|Attributes")
 	float GetMoveSpeedBaseValue() const;
-	
+
 	virtual void Die();
 
 	UFUNCTION(BlueprintCallable, Category = "FECharacter")

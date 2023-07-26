@@ -23,6 +23,9 @@ public:
 	FGameplayTag InputTag_Crouch;
 	FGameplayTag InputTag_Sneak;
 	FGameplayTag InputTag_Assassinate;
+	FGameplayTag InputTag_CarryBody;
+	FGameplayTag InputTag_Possess;
+	FGameplayTag InputTag_Scan;
 	
 protected:
 	// 모든 Tag들을 GameplayTags Manager에 등록하는 함수.

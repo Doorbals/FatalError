@@ -18,4 +18,16 @@ class FATALERROR_API UFEAIAnimInstance : public UAnimInstance
 public:
 	UPROPERTY(BlueprintReadWrite)
 	EFEAIAnimState AnimState;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool IsDead;
+	
+	UPROPERTY(BlueprintReadWrite)
+	bool TurnLeft;
+
+	UPROPERTY(BlueprintReadWrite)
+	int RandomNumber;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsCarried;
 };

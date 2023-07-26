@@ -21,6 +21,12 @@ enum class EFEAbilityInputID : uint8
 	Sneak			UMETA(DisplayName = "Sneak"),
 	// 6 LMB
 	Assassinate		UMETA(DisplayName = "Assassinate"),
+	// 7 E
+	CarryBody		UMETA(DisplayName = "CarryBody"),
+	// 8 E
+	Possess			UMETA(DisplayName = "Possess"),
+	// 9 F
+	Scan			UMETA(DisplayName = "Scan")
 };
 
 UENUM(BlueprintType)
@@ -47,16 +53,23 @@ UENUM(BlueprintType)
 enum class EFEAIAnimState : uint8
 {
 	Idle,
+	RifleIdle,
 	Walk,
 	CrouchWalk,
 	Run,
-	TurnLeft,
-	TurnRight,
-	SuddenTurnLeft,
-	SuddenTurnRight,
-	Afraid,
+	Turn,
+	TurnToRun,
+	SuddenTurn,
+	TurnBeforeRun,
+	React,
 	LookAround,
 	Seek,
-	PushAlert
+	Afraid,
+	PushAlert,
+	EquipWeapon,
+	UnequipWeapon,
+	MeleeAttack,
+	DistanceAttack,
+	Death
 };
  

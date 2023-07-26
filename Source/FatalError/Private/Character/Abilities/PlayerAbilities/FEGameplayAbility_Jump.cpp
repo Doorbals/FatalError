@@ -2,11 +2,9 @@
 
 
 #include "Character/Abilities/PlayerAbilities/FEGameplayAbility_Jump.h"
-
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Character/FEPlayerCharacter.h"
 #include "Character/Abilities/FEAbilitySystemComponent.h"
-#include "Character/Abilities/AbilityTasks/FEAT_WaitInputRelease.h"
 #include "FatalError/FatalError.h"
 
 UFEGameplayAbility_Jump::UFEGameplayAbility_Jump()
@@ -14,8 +12,9 @@ UFEGameplayAbility_Jump::UFEGameplayAbility_Jump()
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::NonInstanced;
 	AbilityTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Ability.Jump")));
 	AbilityTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Input.Ability.Jump")));
-	BlockAbilitiesWithTag.AddTag(FGameplayTag::RequestGameplayTag(FName("Ability.Assassinate")));
-	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Ability.Assassinate")));
+	static const FName NAME_Ability(TEXT("Ability"));
+	BlockAbilitiesWithTag.AddTag(FGameplayTag::RequestGameplayTag(NAME_Ability));
+	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(NAME_Ability));
 }
 
 void UFEGameplayAbility_Jump::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -26,7 +25,13 @@ void UFEGameplayAbility_Jump::ActivateAbility(const FGameplayAbilitySpecHandle H
 	{
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 	}
+	
 	AFEPlayerCharacter* Character = CastChecked<AFEPlayerCharacter>(    ActorInfo->AvatarActor.Get());
+	if(Character == nullptr)
+	{
+		return;
+	}
+	
 	Character->Jump();
 }
 
@@ -40,13 +45,18 @@ bool UFEGameplayAbility_Jump::CanActivateAbility(const FGameplayAbilitySpecHandl
 	}
 	
 	const AFECharacterBase* Character = CastChecked<AFECharacterBase>(ActorInfo->AvatarActor.Get(), ECastCheckedType::NullAllowed);
+	if(Character == nullptr)
+	{
+		return false;
+	}
+	
 	return Character && Character->CanJump();
 }
 
 void UFEGameplayAbility_Jump::InputReleased(const FGameplayAbilitySpecHandle Handle,
 	const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
 {
-	if(ActorInfo != NULL && ActorInfo->AvatarActor != NULL)
+	if(ActorInfo && ActorInfo->AvatarActor != nullptr)
 	{
 		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 	}
@@ -59,6 +69,11 @@ void UFEGameplayAbility_Jump::CancelAbility(const FGameplayAbilitySpecHandle Han
 	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
 
 	AFEPlayerCharacter* Character = CastChecked<AFEPlayerCharacter>(ActorInfo->AvatarActor.Get());
+	if(Character == nullptr)
+	{
+		return;
+	}
+	
 	Character->StopJumping();
 }
 

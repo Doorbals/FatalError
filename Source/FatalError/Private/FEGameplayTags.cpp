@@ -24,6 +24,9 @@ void FFEGameplayTags::AddAllTags(UGameplayTagsManager& Manager)
 	AddTag(InputTag_Jump, "Input.Ability.Jump", "Jump input");
 	AddTag(InputTag_Sneak, "Input.Ability.Sneak", "Sneak input.");
 	AddTag(InputTag_Assassinate, "Input.Ability.Assassinate", "Assassinate input.");
+	//AddTag(InputTag_CarryBody, "Input.Ability.CarryBody", "CarryBody input.");
+	//AddTag(InputTag_Possess, "Input.Ability.Possess", "Possess input.");
+	//AddTag(InputTag_Scan, "Input.Ability.Scan", "Scan input.");
 }
 
 // 입력 받은 Tag를 Manager에 Native Tag로 등록함과 동시에 OutTag에 해당 Tag 저장

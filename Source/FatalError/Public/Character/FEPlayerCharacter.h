@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Character/FECharacterBase.h"
 #include "InputActionValue.h"
+#include "Components/TimelineComponent.h"
 #include "FatalError/FatalError.h"
 #include "Perception/AISightTargetInterface.h"
 #include "FEPlayerCharacter.generated.h"
@@ -51,6 +52,8 @@ protected:
 	float BaseCapsuleHalfHeight = 88.0f;
 	
 	FGameplayTag DeadTag;
+
+	APlayerCameraManager* CameraManager;
 	
 	virtual void BeginPlay() override;
 	
@@ -83,16 +86,28 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	class UInputMappingContext* ClimbInputMapping;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "MotionWarping")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UMotionWarpingComponent> MotionWarpingComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	class UAnimMontage* AssassinateMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	TArray<class UAnimMontage*> AttackMontages;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	class UAnimMontage* CarryBodyMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	class UAnimMontage* DropBodyMontage;
+		
 	UFUNCTION(BlueprintCallable)
 	void SetControlMode(EFEMovementState InMovementState);
 	
 	virtual void Jump() override;
 	
 	virtual void StopJumping() override;
-
+	
 	void ToggleCrouch();
 
 	void WallTrace();
@@ -101,7 +116,15 @@ public:
 
 	void EndSneak();
 
-	void SneakTrace(float InMoveRight, float InMoveForward);
+	void SneakMoveTrace(float InMoveRight, float InMoveForward);
+	
+	void CheckCameraXAxisLocation();
+
+	void CheckCameraYAxisLocation();
+
+	uint8 CameraXAxisLocation;
+
+	uint8 CameraYAxisLocation;
 
 	UPROPERTY(BlueprintReadOnly)
 	bool bIsSneak;
@@ -126,6 +149,35 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	bool bMovementEnabled;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsCarryingBody;
+
+	uint8 AttackMontagesOrder;
 	
 	FAIPerceptionTargetOnUpdated TargetOnUpdated;
+
+	// SpringArm Timeline
+	UPROPERTY(EditAnywhere, Category="Timeline")
+	UCurveFloat* SpringArmTimelineCurve;
+	
+	UTimelineComponent* SpringArmTimeline;
+
+	UTimelineComponent* ClimbOuterTurnTimeline;
+	
+private:
+	FOnTimelineFloat SpringArmTimelineUpdateDelegate;
+
+	FOnTimelineFloat ClimbOuterTurnTimelineUpdateDelegate;
+
+	FOnTimelineEvent ClimbOuterTurnTimelineFinishDelegate;
+
+	UFUNCTION()
+	void SpringArmTimelineUpdateFunc(float Output);
+	
+	UFUNCTION()
+	void ClimbOuterTurnTimelineUpdateFunc(float Output);
+
+	UFUNCTION()
+	void ClimbOuterTurnTimelineFinishFunc();
 };

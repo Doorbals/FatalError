@@ -15,7 +15,6 @@ UFEGameplayAbility::UFEGameplayAbility()
 	// ActivationBlockedTags : 게임 플레이 어빌리티가 활성화되는 것을 방지하는 태그 집합
 	// 어빌리티가 활성화되기 전에 이 집합에 있는 태그가 액터에 적용되어 있다면, 이 어빌리티는 활성화 X
 	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("State.Dead")));
-	ActivationBlockedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("State.Debuff.Stun")));
 }
 
 // 어빌리티가 캐릭터에게 할당될 때 호출

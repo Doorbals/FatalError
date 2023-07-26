@@ -1,10 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "AI/BT/Task/BTT_CustomRotateToFaceBBEntry.h"
-
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #include "BehaviorTree/Tasks/BTTask_RotateToFaceBBEntry.h"
 #include "GameFramework/Actor.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
@@ -12,8 +8,17 @@
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Rotator.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AIController.h"
+#include "Animation/FEAIAnimInstance.h"
+#include "Animation/FEAnimInstance.h"
+#include "GameFramework/Character.h"
+#include "Kismet/KismetMathLibrary.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BTT_CustomRotateToFaceBBEntry)
+
+UBTT_CustomRotateToFaceBBEntry::UBTT_CustomRotateToFaceBBEntry()
+{
+	NodeName = FString("Custom Rotate To Face BBEntry");
+}
 
 void UBTT_CustomRotateToFaceBBEntry::PostInitProperties()
 {
@@ -89,7 +94,6 @@ EBTNodeResult::Type UBTT_CustomRotateToFaceBBEntry::ExecuteTask(UBehaviorTreeCom
 		const FVector KeyValue = MyBlackboard->GetValue<UBlackboardKeyType_Vector>(BlackboardKey.GetSelectedKeyID());
 		ToFocalPointRotator = (KeyValue - PawnLocation).Rotation();
 		
-		UE_LOG(LogTemp, Log, TEXT("%f"), PawnDirectionRotator.Yaw - ToFocalPointRotator.Yaw);
 		if (FAISystem::IsValidLocation(KeyValue))
 		{
 			const float AngleDifference = CalculateAngleDifferenceDot(Pawn->GetActorForwardVector()
@@ -132,14 +136,25 @@ EBTNodeResult::Type UBTT_CustomRotateToFaceBBEntry::ExecuteTask(UBehaviorTreeCom
 		}
 	}
 
-	if(PawnDirectionRotator.Yaw - ToFocalPointRotator.Yaw > 0)
+	bool TurnLeft;
+	float RotDifference = PawnDirectionRotator.Yaw - ToFocalPointRotator.Yaw;
+	if((RotDifference > 0 && RotDifference <= 180) || RotDifference < -180)
 	{
-		OwnerComp.GetBlackboardComponent()->SetValueAsBool(FName("TurnLeft"), true);
+		TurnLeft = true;
 	}
 	else
 	{
-		OwnerComp.GetBlackboardComponent()->SetValueAsBool(FName("TurnLeft"), false);
+		TurnLeft = false;
 	}
+	OwnerComp.GetBlackboardComponent()->SetValueAsBool(FName("TurnLeft"), TurnLeft);
+	
+	ACharacter* Character = Cast<ACharacter>(Pawn);
+	if (Character != nullptr)
+	{
+		UFEAIAnimInstance* AnimInstance = Cast<UFEAIAnimInstance>(Character->GetMesh()->GetAnimInstance());
+		AnimInstance->TurnLeft = TurnLeft;
+	}
+	
 	return Result;
 }
 

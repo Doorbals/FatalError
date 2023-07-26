@@ -4,6 +4,8 @@
 #include "Player/FEPlayerState.h"
 #include "Character/Abilities/FEAbilitySystemComponent.h"
 #include "Character/Abilities/AttributeSet/FEAttributeSetBase.h"
+#include "Player/FEPlayerController.h"
+#include "UI/FEHUDWidget.h"
 
 AFEPlayerState::AFEPlayerState()
 {
@@ -90,15 +92,22 @@ void AFEPlayerState::BeginPlay()
 		EnergyChangedDelegateHandle = AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AttributeSetBase->GetEnergyAttribute()).AddUObject(this, &AFEPlayerState::EnergyChanged);
 		MaxEnergyChangedDelegateHandle = AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AttributeSetBase->GetMaxEnergyAttribute()).AddUObject(this, &AFEPlayerState::MaxEnergyChanged);
 		EnergyRegenRateChangedDelegateHandle = AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AttributeSetBase->GetEnergyRegenRateAttribute()).AddUObject(this, &AFEPlayerState::EnergyRegenRateChanged);
-		
-		// 특정 태그가 변경될 때 실행되는 콜백 함수 등록
-		AbilitySystemComponent->RegisterGameplayTagEvent(FGameplayTag::RequestGameplayTag(FName("State.Debuff.Stun")), EGameplayTagEventType::NewOrRemoved).AddUObject(this, &AFEPlayerState::StunTagChanged);
 	}
 }
 
 void AFEPlayerState::HealthChanged(const FOnAttributeChangeData& Data)
 {
-	UE_LOG(LogTemp, Log, TEXT("Health Changed"));
+	UE_LOG(LogTemp, Log, TEXT("Health Changed %f"), Data.NewValue);
+	CastChecked<AFEPlayerController>(GetOwningController())->FEHUDWidget->UpdateHp(Data.NewValue / GetMaxHealth());
+	if(Data.NewValue <= 0.0f && Data.OldValue != 0.0f)
+	{
+		
+		AFECharacterBase* CharacterBase = Cast<AFECharacterBase>(GetOwningController()->GetCharacter());
+		if(CharacterBase != nullptr)
+		{
+			CharacterBase->Die();
+		}
+	}
 }
 
 void AFEPlayerState::MaxHealthChanged(const FOnAttributeChangeData& Data)
@@ -114,6 +123,7 @@ void AFEPlayerState::HealthRegenRateChanged(const FOnAttributeChangeData& Data)
 void AFEPlayerState::EnergyChanged(const FOnAttributeChangeData& Data)
 {
 	UE_LOG(LogTemp, Log, TEXT("Energy Changed"));
+	CastChecked<AFEPlayerController>(GetOwningController())->FEHUDWidget->UpdateEnergy(Data.NewValue / GetMaxEnergy());
 }
 
 void AFEPlayerState::MaxEnergyChanged(const FOnAttributeChangeData& Data)

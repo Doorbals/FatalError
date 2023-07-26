@@ -18,13 +18,28 @@ class FATALERROR_API AFEPlayerController : public APlayerController, public IGen
 	
 public:
 	AFEPlayerController();
+	
 	FGenericTeamId TeamId;
+	
 	virtual FGenericTeamId GetGenericTeamId() const override;
 
-protected:
+	virtual void SetGenericTeamId(const FGenericTeamId& InTeamId) override { TeamId = InTeamId; }
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=HUD)
+	TSubclassOf<class UFEHUDWidget> FEHUDWidgetClass;
 
-	// Server only
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=HUD)
+	TObjectPtr<class UFEHUDWidget> FEHUDWidget;
+	
+protected:
+	virtual void BeginPlay() override;
+	
 	virtual void OnPossess(APawn* InPawn) override;
+	
 	virtual void PostProcessInput(const float DeltaTime, const bool bGamePaused) override;
+	
 	UFEAbilitySystemComponent* GetFEAbilitySystemComponent();
+
+	
+	
 };

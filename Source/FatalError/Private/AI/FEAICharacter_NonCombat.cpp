@@ -1,12 +1,15 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "AI/FEAICharacter_NonCombat.h"
+#include "MotionWarpingComponent.h"
 #include "AI/FEAIController.h"
+#include "AI/FEAlert.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 AFEAICharacter_NonCombat::AFEAICharacter_NonCombat()
 {
+	MotionWarpingComponent = CreateDefaultSubobject<UMotionWarpingComponent>(FName("MotionWarping Component"));
+	PhysicsBoneName = FName("pelvis");
 }
 
 void AFEAICharacter_NonCombat::PossessedBy(AController* NewController)
@@ -31,10 +34,25 @@ void AFEAICharacter_NonCombat::PossessedBy(AController* NewController)
 	if(PatrolLocation != nullptr)
 	{
 		AIController->GetBlackboardComponent()->SetValueAsVector(FName("PatrolLocation"), PatrolLocation->GetActorLocation());
+	} 
+	
+	if(AlertActor != nullptr)
+	{
+		AlertActor->AlertConditionOnChangedDelegate.AddUObject(this, &ThisClass::UpdateAlertCondition);
 	}
 	
 	AIController->GetBlackboardComponent()->SetValueAsEnum(FName("CurrentAnimState"), static_cast<uint8>(EFEAIAnimState::Idle));
-
 	AIController->GetBlackboardComponent()->SetValueAsEnum(FName("CurrentDetectState"), static_cast<uint8>(EFEDetectState::Green));
+	AIController->GetBlackboardComponent()->SetValueAsObject(FName("AlertActor"), AlertActor);
+
+	MotionWarpingComponent->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("Target"), AlertActor->GetActorLocation(), AlertActor->GetActorRotation());
 }
-	
+
+void AFEAICharacter_NonCombat::UpdateAlertCondition(bool InBoolValue)
+{
+	AFEAIController* AIController = Cast<AFEAIController>(GetController());
+	if(AIController != nullptr)
+	{
+		AIController->GetBlackboardComponent()->SetValueAsBool(FName("IsPushedAlert"), InBoolValue);
+	}
+}

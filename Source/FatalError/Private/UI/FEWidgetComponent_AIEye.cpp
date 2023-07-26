@@ -79,46 +79,24 @@ void UFEWidgetComponent_AIEye::SetCurrentDetectState()
 		bCanChangeColor = false;
 	}
 	
-	// 청각은 0.5초이기 때문에 감각 사라질 때가 아닌, 5초 기다린 뒤에 게이지 하강
-	if(AIDetectionInfo->GetIsHearingSound() && AIDetectionInfo->GetIsPercentFull())
-	{ 
-		bGageDescendingStop = true;
-		GetWorld()->GetTimerManager().SetTimer(GageDescendingTimerHandle, FTimerDelegate::CreateLambda([&]()
-			{
-				bGageDescendingStop = false;
-				GetWorld()->GetTimerManager().ClearTimer(GageDescendingTimerHandle);
-			}), DescendingWaitTime, false);
-	}
-
 	// 특정 감지 단계에서 게이지 퍼센트가 0이 될 때 이전 단계 색상으로 전환
 	if(EyeIconWidget->DetectionGage->GetPercent() == 0.0f)
 	{
 		switch (AIDetectionInfo->GetCurrentDetectState())
 		{
 		case EFEDetectState::Red:
-			bGageDescendingStop = true;
+			AIDetectionInfo->SetIsTargetDetected(true);
 			SightValuePercent = 1.0f;
 			AIDetectionInfo->SetCurrentDetectState(EFEDetectState::Orange);
 			SetFillColor();
 			EyeIconWidget->DetectionGage->SetPercent(SightValuePercent);
-			// 이전 색상으로 변경 된 이후 일정 시간 대기 후 게이지 감소하도록 타이머 설정
-			GetWorld()->GetTimerManager().SetTimer(GageDescendingTimerHandle, FTimerDelegate::CreateLambda([&]()
-			{
-				bGageDescendingStop = false;
-				GetWorld()->GetTimerManager().ClearTimer(GageDescendingTimerHandle);
-			}), DescendingWaitTime, false);
 			break;
 		case EFEDetectState::Orange:
-			bGageDescendingStop = true;
+			AIDetectionInfo->SetIsTargetDetected(true);
 			SightValuePercent = 1.0f;
 			AIDetectionInfo->SetCurrentDetectState(EFEDetectState::Yellow);
 			SetFillColor();
 			EyeIconWidget->DetectionGage->SetPercent(SightValuePercent);
-			GetWorld()->GetTimerManager().SetTimer(GageDescendingTimerHandle, FTimerDelegate::CreateLambda([&]()
-			{
-				bGageDescendingStop = false;
-				GetWorld()->GetTimerManager().ClearTimer(GageDescendingTimerHandle);
-			}), DescendingWaitTime, false);
 			break;
 		case EFEDetectState::Yellow:
 			AIDetectionInfo->SetCurrentDetectState(EFEDetectState::Green);
@@ -127,21 +105,39 @@ void UFEWidgetComponent_AIEye::SetCurrentDetectState()
 			break;
 		}
 	}
-
-	// 일정 시야 감도 이상이면 바로 빨간색 단계로 변경
-	if(AIDetectionInfo->GetTargetSightStrength() > 0.7f)
+	
+	// 일정 시야 감도 이상이면 바로 특정 단계로 변경
+	if(AIDetectionInfo->GetTargetSightStrength() >= 0.9f)
 	{
-		EyeIconWidget->DetectionGage->SetPercent(1.0f);
+		SightValuePercent = 1.0f;
+		EyeIconWidget->DetectionGage->SetPercent(SightValuePercent);
+		AIDetectionInfo->SetIsPercentFull(true);
 		AIDetectionInfo->SetCurrentDetectState(EFEDetectState::Red);
 		SetFillColor();
 	}
-
-	// 일정 청각 감도 이상이면 바로 빨간색 단계로 변경
-	if(AIDetectionInfo->GetTargetHearingStrength() == 1.0f)
+	else if(AIDetectionInfo->GetTargetSightStrength() >= 0.7f)
 	{
-		EyeIconWidget->DetectionGage->SetPercent(1.0f);
-		AIDetectionInfo->SetCurrentDetectState(EFEDetectState::Red);
-		SetFillColor();
+		if(AIDetectionInfo->GetCurrentDetectState() <= EFEDetectState::Yellow)
+		{
+			SightValuePercent = 1.0f;
+			EyeIconWidget->DetectionGage->SetPercent(SightValuePercent);
+			AIDetectionInfo->SetIsPercentFull(true);
+			AIDetectionInfo->SetCurrentDetectState(EFEDetectState::Orange);
+			SetFillColor();
+		}
+	}
+
+	// 일정 청각 감도 이상이면 바로 주황색 단계로 변경
+	if(AIDetectionInfo->GetTargetHearingStrength() >= 0.7f)
+	{
+		if(AIDetectionInfo->GetCurrentDetectState() <= EFEDetectState::Yellow)
+		{
+			SightValuePercent = 1.0f;
+			EyeIconWidget->DetectionGage->SetPercent(SightValuePercent);
+			AIDetectionInfo->SetIsPercentFull(true);
+			AIDetectionInfo->SetCurrentDetectState(EFEDetectState::Orange);
+			SetFillColor();
+		}
 	}
 }
 
@@ -170,14 +166,14 @@ void UFEWidgetComponent_AIEye::SetSightStrengthMultiplier()
 {
 	if(AIDetectionInfo->GetCurrentDetectState() == EFEDetectState::Green)
 	{
-		AIDetectionInfo->SetSightStrengthMultiplier(1.0f);
+		AIDetectionInfo->SetSightStrengthMultiplier(0.25f);
 	}
 	else if(AIDetectionInfo->GetCurrentDetectState() == EFEDetectState::Yellow)
 	{
-		AIDetectionInfo->SetSightStrengthMultiplier(1.2f);
+		AIDetectionInfo->SetSightStrengthMultiplier(0.3f);
 	}
 	else
 	{
-		AIDetectionInfo->SetSightStrengthMultiplier(1.3f);
+		AIDetectionInfo->SetSightStrengthMultiplier(0.35f);
 	}
 }

@@ -21,6 +21,7 @@ class FATALERROR_API IFEI_Assassination
 	GENERATED_BODY()
 	
 public:
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
-	void Assassinated(FVector& Location, FRotator& Rotation);
+	virtual void Assassinated(FVector& Location, FRotator& Rotation) = 0;
+
+	virtual void Attacked(FVector& Location, FRotator& Rotation) = 0;
 };

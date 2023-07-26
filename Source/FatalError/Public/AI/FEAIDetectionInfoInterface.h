@@ -50,4 +50,7 @@ public:
 
 	virtual FVector GetFinalStimulusLocation() = 0;
 	virtual void SetFinalStimulusLocation(const FVector& InValue) = 0;
+
+	virtual bool GetIsTargetOutOfSight() = 0;
+	virtual void SetIsTargetOutOfSight(bool InValue) = 0;
 };

@@ -18,7 +18,9 @@ public:
 
 protected:
 	virtual void PossessedBy(AController* NewController) override;
-	
+
+	void UpdateAlertCondition(bool InBoolValue);
+
 private:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<class UBlackboardData> BBAsset;
@@ -29,4 +31,7 @@ private:
 public:
 	UPROPERTY(EditAnywhere)
 	AActor* PatrolLocation;
+
+	UPROPERTY(EditAnywhere)
+	class AFEAlert* AlertActor;
 };

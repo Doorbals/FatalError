@@ -22,7 +22,7 @@ private:
 	float PrecisionDot;
 
 public:
-
+	UBTT_CustomRotateToFaceBBEntry();
 	virtual void PostInitProperties() override;
 	virtual void PostLoad() override;
 
