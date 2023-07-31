@@ -9,9 +9,15 @@
 #include "GameplayEffectTypes.h"
 #include "FEPlayerState.generated.h"
 
+
 /**
  * 
  */
+
+DECLARE_DELEGATE_OneParam(FOnHealthChanged, const float);
+DECLARE_DELEGATE_OneParam(FOnEnergyChanged, const float);
+DECLARE_DELEGATE(FOnRunOutOfHealth);
+
 UCLASS()
 class FATALERROR_API AFEPlayerState : public APlayerState, public IAbilitySystemInterface	// IAbilitySystemInterface 상속받음.
 {
@@ -55,11 +61,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "FEPlayerState|Attributes")
 	float GetMoveSpeed() const;
 
+	FOnHealthChanged HealthChangeDelegate;
+	FOnEnergyChanged EnergyChangeDelegate;
+	FOnRunOutOfHealth RunOutOfHealthDelegate;
+
 protected:
 	UPROPERTY()
 	class UFEAbilitySystemComponent* AbilitySystemComponent;
-
-	// 
+	
 	UPROPERTY()
 	class UFEAttributeSetBase* AttributeSetBase;
 

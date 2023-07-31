@@ -2,7 +2,6 @@
 
 
 #include "Character/FESpiderRobotPawn.h"
-
 #include "AIController.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -13,7 +12,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Player/FEPlayerController.h"
-#include "UI/FEHUDWidget.h"
 
 // Sets default values
 AFESpiderRobotPawn::AFESpiderRobotPawn()
@@ -43,7 +41,7 @@ AFESpiderRobotPawn::AFESpiderRobotPawn()
 void AFESpiderRobotPawn::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
-
+	
 	PlayerController = Cast<AFEPlayerController>(NewController);
 	if(PlayerController != nullptr)
 	{
@@ -53,7 +51,7 @@ void AFESpiderRobotPawn::PossessedBy(AController* NewController)
 		Subsystem->ClearAllMappings();
 		Subsystem->AddMappingContext(InputMapping, 0);
 		PlayerController->SetGenericTeamId(FGenericTeamId(1));
-		PlayerController->FEHUDWidget->PlayAnimation(PlayerController->FEHUDWidget->DownAnimation);
+		SetActorTickEnabled(true);
 	}
 }
 
@@ -65,6 +63,7 @@ void AFESpiderRobotPawn::BeginPlay()
 	OriginPlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	TargetLocation = GetActorLocation();
 	PlayerController = Cast<AFEPlayerController>(GetController());
+	SetActorTickEnabled(false);
 }
 
 // Called every frame
@@ -75,7 +74,7 @@ void AFESpiderRobotPawn::Tick(float DeltaTime)
 	if(!bIsTerminated && bIsPossessed)
 	{
 		CurrentRemainingTime = FMath::Clamp(CurrentRemainingTime - DeltaTime, 0.0f, BaseRemainingTime);
-		PlayerController->FEHUDWidget->UpdateSpiderRobotRemainingTime(CurrentRemainingTime);
+		RemainingTimeChangedDelegate.Execute(CurrentRemainingTime);
 		if(CurrentRemainingTime <= 0.0f)
 		{
 			Terminate();
@@ -185,11 +184,6 @@ void AFESpiderRobotPawn::Move(const FInputActionValue& Value)
 			SetActorRotation(UKismetMathLibrary::RLerp(GetActorRotation(), TargetRotation, 0.15f, true));
 		}
 	}
-
-	/*if(!GetMovementComponent()->IsFalling() && MovementState == EFEMovementState::InAir)
-	{
-		MovementState = EFEMovementState::Grounded;
-	}*/
 }
 
 void AFESpiderRobotPawn::Look(const FInputActionValue& Value)
@@ -206,7 +200,7 @@ void AFESpiderRobotPawn::Look(const FInputActionValue& Value)
 void AFESpiderRobotPawn::Terminate()
 {
 	bIsTerminated = true;
-	PlayerController->FEHUDWidget->UpdateSpiderRobotRemainingTime(0.0f);
+	RemainingTimeChangedDelegate.Execute(0.0f);
 	
 	Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	Mesh->SetSimulatePhysics(true);
@@ -215,8 +209,8 @@ void AFESpiderRobotPawn::Terminate()
 			{
 				GetController()->Possess(OriginPlayerCharacter);
 				PossessArea->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-				PlayerController->FEHUDWidget->PlayAnimation(PlayerController->FEHUDWidget->UpAnimation);
+				UnPossessedSpiderRobot.Broadcast();
 				GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
-
+				SetActorTickEnabled(false);
 			}), 3.0f, false);
 }

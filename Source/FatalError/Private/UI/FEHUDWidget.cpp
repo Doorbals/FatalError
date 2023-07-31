@@ -3,11 +3,9 @@
 
 #include "UI/FEHUDWidget.h"
 #include "MovieScene.h"
-#include "Animation/WidgetAnimation.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Kismet/KismetTextLibrary.h"
-
 
 UFEHUDWidget::UFEHUDWidget(const FObjectInitializer& ObjectInitializer):UUserWidget(ObjectInitializer)
 {
@@ -52,5 +50,15 @@ void UFEHUDWidget::UpdateSpiderRobotRemainingTime(float InTime)
 {
 	TimeText->SetText(UKismetTextLibrary::Conv_FloatToText(InTime, ERoundingMode::HalfToEven, false, true,
 		2, 324, 2, 2));
+}
+
+void UFEHUDWidget::PlayUpAnimation()
+{
+	PlayAnimation(UpAnimation);
+}
+
+void UFEHUDWidget::PlayDownAnimation()
+{
+	PlayAnimation(DownAnimation);
 }
 

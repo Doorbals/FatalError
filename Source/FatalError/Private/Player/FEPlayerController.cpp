@@ -4,6 +4,7 @@
 #include "Player/FEPlayerController.h"
 #include "AbilitySystemComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "Character/FESpiderRobotPawn.h"
 #include "Character/Abilities/FEAbilitySystemComponent.h"
 #include "Player/FEPlayerState.h"
 #include "UI/FEHUDWidget.h"
@@ -32,6 +33,12 @@ void AFEPlayerController::BeginPlay()
 	if(FEHUDWidget)
 	{
 		FEHUDWidget->AddToViewport();
+		AFEPlayerState* PS = GetPlayerState<AFEPlayerState>();
+		if (PS)
+		{
+			PS->HealthChangeDelegate.BindUObject(FEHUDWidget, &UFEHUDWidget::UpdateHp);
+			PS->EnergyChangeDelegate.BindUObject(FEHUDWidget, &UFEHUDWidget::UpdateEnergy);
+		}
 	}
 }
 
@@ -46,6 +53,21 @@ void AFEPlayerController::OnPossess(APawn* InPawn)
     	// 어빌리티 시스템 컴포넌트의 액터를 초기화. (Owner : PlayerState / AvatarActor : Pawn으로 정보 설정)
     	PS->GetAbilitySystemComponent()->InitAbilityActorInfo(PS, InPawn);
     }
+
+	AFECharacterBase* PlayerCharacter = Cast<AFECharacterBase>(GetCharacter());
+	if(PlayerCharacter)
+	{
+		PS->RunOutOfHealthDelegate.BindUObject(PlayerCharacter, &AFECharacterBase::Die);
+	}
+
+	AFESpiderRobotPawn* SpiderRobotPawn = Cast<AFESpiderRobotPawn>(GetPawn());
+	if(SpiderRobotPawn)
+	{
+		SpiderRobotPawn->RemainingTimeChangedDelegate.BindUObject(FEHUDWidget, &UFEHUDWidget::UpdateSpiderRobotRemainingTime);
+		SpiderRobotPawn->PossessedSpiderRobot.AddUObject(FEHUDWidget, &UFEHUDWidget::PlayDownAnimation);
+		SpiderRobotPawn->PossessedSpiderRobot.Broadcast();
+		SpiderRobotPawn->UnPossessedSpiderRobot.AddUObject(FEHUDWidget, &UFEHUDWidget::PlayUpAnimation);
+	}
 }
 
 // 플레이어의 입력이 받아지고 처리된 후 호출되는 함수. 여기에서 AbilitySystem의 ProcessAbilityInput 함수 실행

@@ -4,8 +4,6 @@
 #include "Player/FEPlayerState.h"
 #include "Character/Abilities/FEAbilitySystemComponent.h"
 #include "Character/Abilities/AttributeSet/FEAttributeSetBase.h"
-#include "Player/FEPlayerController.h"
-#include "UI/FEHUDWidget.h"
 
 AFEPlayerState::AFEPlayerState()
 {
@@ -98,14 +96,11 @@ void AFEPlayerState::BeginPlay()
 void AFEPlayerState::HealthChanged(const FOnAttributeChangeData& Data)
 {
 	UE_LOG(LogTemp, Log, TEXT("Health Changed %f"), Data.NewValue);
-	CastChecked<AFEPlayerController>(GetOwningController())->FEHUDWidget->UpdateHp(Data.NewValue / GetMaxHealth());
+	HealthChangeDelegate.Execute(Data.NewValue / GetMaxHealth());
+	
 	if(Data.NewValue <= 0.0f && Data.OldValue != 0.0f)
 	{
-		AFECharacterBase* CharacterBase = Cast<AFECharacterBase>(GetOwningController()->GetCharacter());
-		if(CharacterBase != nullptr)
-		{
-			CharacterBase->Die();
-		}
+		RunOutOfHealthDelegate.Execute();
 	}
 }
 
@@ -122,7 +117,7 @@ void AFEPlayerState::HealthRegenRateChanged(const FOnAttributeChangeData& Data)
 void AFEPlayerState::EnergyChanged(const FOnAttributeChangeData& Data)
 {
 	UE_LOG(LogTemp, Log, TEXT("Energy Changed"));
-	CastChecked<AFEPlayerController>(GetOwningController())->FEHUDWidget->UpdateEnergy(Data.NewValue / GetMaxEnergy());
+	EnergyChangeDelegate.Execute(Data.NewValue / GetMaxEnergy());
 }
 
 void AFEPlayerState::MaxEnergyChanged(const FOnAttributeChangeData& Data)

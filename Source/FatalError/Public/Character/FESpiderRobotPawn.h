@@ -8,6 +8,10 @@
 #include "FatalError/FatalError.h"
 #include "FESpiderRobotPawn.generated.h"
 
+DECLARE_DELEGATE_OneParam(FOnRemainingTimeChanged, const float);
+DECLARE_MULTICAST_DELEGATE(FOnPossessedSpiderRobot);
+DECLARE_MULTICAST_DELEGATE(FOnUnPossessedSpiderRobot);
+
 UCLASS()
 class FATALERROR_API AFESpiderRobotPawn : public APawn
 {
@@ -91,4 +95,8 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	EFEMovementState MovementState;
+
+	FOnRemainingTimeChanged RemainingTimeChangedDelegate;
+	FOnPossessedSpiderRobot PossessedSpiderRobot;
+	FOnUnPossessedSpiderRobot UnPossessedSpiderRobot;
 };

@@ -26,6 +26,10 @@ public:
 	void UpdateEnergy(float NewPercent);
 
 	void UpdateSpiderRobotRemainingTime(float InTime);
+
+	void PlayUpAnimation();
+
+	void PlayDownAnimation();
 	
 	UPROPERTY()
 	TObjectPtr<class UProgressBar> HealthProgressBar;
