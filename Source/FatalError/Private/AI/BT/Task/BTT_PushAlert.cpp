@@ -1,9 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "AI/BT/Task/BTT_PushAlert.h"
-#include "AIController.h"
-#include "AI/FEAICharacter_NonCombat.h"
 #include "AI/FEAlert.h"
 #include "BehaviorTree/BlackboardComponent.h"
 

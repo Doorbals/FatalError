@@ -3,9 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Animation/WidgetAnimation.h"
 #include "Blueprint/UserWidget.h"
-#include "UObject/UnrealTypePrivate.h"
 #include "FEHUDWidget.generated.h"
 
 /**

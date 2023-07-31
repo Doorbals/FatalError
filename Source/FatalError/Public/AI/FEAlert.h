@@ -24,7 +24,6 @@ public:
 	void PushAlert();
 	virtual void PushAlert_Implementation();
 
-
 protected:
 	float AlertCoolTime;
 

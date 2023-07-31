@@ -2,7 +2,6 @@
 
 
 #include "Character/Abilities/AttributeSet/FEAttributeSetBase.h"
-
 #include "Net/UnrealNetwork.h"
 
 UFEAttributeSetBase::UFEAttributeSetBase()

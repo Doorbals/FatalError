@@ -101,7 +101,6 @@ void AFEPlayerState::HealthChanged(const FOnAttributeChangeData& Data)
 	CastChecked<AFEPlayerController>(GetOwningController())->FEHUDWidget->UpdateHp(Data.NewValue / GetMaxHealth());
 	if(Data.NewValue <= 0.0f && Data.OldValue != 0.0f)
 	{
-		
 		AFECharacterBase* CharacterBase = Cast<AFECharacterBase>(GetOwningController()->GetCharacter());
 		if(CharacterBase != nullptr)
 		{
