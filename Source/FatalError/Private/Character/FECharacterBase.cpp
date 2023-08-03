@@ -137,7 +137,6 @@ float AFECharacterBase::GetMoveSpeedBaseValue() const
 // 캐릭터가 죽었을 때 실행
 void AFECharacterBase::Die()
 {
-	UE_LOG(LogTemp, Log, TEXT("die"));
 	// 캐릭터의 어빌리티 모두 제거
 	RemoveCharacterAbilities();
 

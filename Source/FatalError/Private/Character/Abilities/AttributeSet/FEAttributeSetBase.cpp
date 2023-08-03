@@ -81,6 +81,7 @@ void UFEAttributeSetBase::AdjustAttributeForMaxChange(FGameplayAttributeData& Af
 	}
 }
 
+// https://docs.unrealengine.com/5.1/ko/gameplay-attributes-and-attribute-sets-for-the-gameplay-ability-system-in-unreal-engine/
 void UFEAttributeSetBase::OnRep_Health(const FGameplayAttributeData& OldHealth)
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UFEAttributeSetBase, Health, OldHealth);

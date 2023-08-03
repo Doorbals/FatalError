@@ -24,7 +24,6 @@ public:
 	
 	virtual void BeginPlay() override;
 	
-
 	UFUNCTION()
 	void OnTargetPerceptionUpdated_Delegate(AActor* Actor, struct FAIStimulus Stimulus);
 
