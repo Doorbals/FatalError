@@ -15,9 +15,14 @@ class FATALERROR_API UFEAnimInstance : public UAnimInstance
 	GENERATED_BODY()
 
 private:
+	virtual void NativeInitializeAnimation() override;
+	
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 	
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<ACharacter> Character;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float CurrentPawnSpeed;
 

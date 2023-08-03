@@ -5,15 +5,20 @@
 
 #include "GameFramework/Character.h"
 
+void UFEAnimInstance::NativeInitializeAnimation()
+{
+	Super::NativeInitializeAnimation();
+
+	Character = Cast<ACharacter>(TryGetPawnOwner());
+}
+
 void UFEAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
-
-	auto Pawn = TryGetPawnOwner();
-	if(IsValid(Pawn))
+	
+	if(IsValid(Character))
 	{
-		CurrentPawnSpeed = Pawn->GetVelocity().Size();
-		auto Character = Cast<ACharacter>(Pawn);
+		CurrentPawnSpeed = Character->GetVelocity().Size();
 		IsCrouching = Character->bIsCrouched;
 	}
 }
