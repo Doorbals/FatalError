@@ -354,7 +354,7 @@ void AFEPlayerCharacter::SetControlMode(EFEMovementState InMovementState)
 				
 			SpringArmTimeline->Play();
 			ClimbOuterTurnTimeline->PlayFromStart();
-		} 
+		}
 		break;
 	}
 }

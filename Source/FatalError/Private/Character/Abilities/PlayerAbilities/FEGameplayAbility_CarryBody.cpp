@@ -21,84 +21,15 @@ UFEGameplayAbility_CarryBody::UFEGameplayAbility_CarryBody()
 }
 
 void UFEGameplayAbility_CarryBody::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
-	const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
-	const FGameplayEventData* TriggerEventData)
+                                                   const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
+                                                   const FGameplayEventData* TriggerEventData)
 {
 	if(!CommitAbility(Handle, ActorInfo, ActivationInfo))
 	{
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 	}
-	
-	AFEPlayerCharacter* Character = CastChecked<AFEPlayerCharacter>(    ActorInfo->AvatarActor.Get());
-	if(Character == nullptr)
-	{
-		return;
-	}
-	
-	TArray<AActor*> OverlappingActors;
-	TArray<AActor*> ImplementedActors;
-	Character->GetOverlappingActors(OverlappingActors);
-	for (AActor* OverlappingActor : OverlappingActors)
-	{
-		IFEI_CarryBody* CarryBodyInterface = Cast<IFEI_CarryBody>(OverlappingActor);
-		if(CarryBodyInterface != nullptr)
-		{
-			ImplementedActors.Add(OverlappingActor);
-		}
-	}
-	
-	if(ImplementedActors.Num() > 0)
-	{
-		AICharacter = Cast<AFEAICharacterBase>(ImplementedActors.Top());
-		
-		if(AICharacter != nullptr)
-		{
-			if(!AICharacter->bIsDead)
-			{
-				CancelAbility(Handle, ActorInfo, ActivationInfo, false);
-				return;
-			}
-			
-			FVector Location;
-			FRotator Rotation;
-			UAnimMontage* MontageToPlay;
 
-			Character->GetCharacterMovement()->MaxWalkSpeedCrouched = 0.0f;
-			Character->GetCharacterMovement()->RotationRate = FRotator(0.0f, 0.0f, 0.0f);
-			if(!AICharacter->bIsCarried)
-			{
-				AICharacter->CarriedByPlayer(Location, Rotation);
-				Character->MotionWarpingComponent->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("Body"), Location, Rotation);
-				MontageToPlay = Character->CarryBodyMontage;
-				Character->bIsCarryingBody = true;
-				Character->Crouch();
-			}
-			else
-			{
-				AICharacter->DroppedByPlayer(Location, Rotation);
-				MontageToPlay = Character->DropBodyMontage;  
-				Character->bIsCarryingBody = false;
-				Character->GetCharacterMovement()->StopMovementImmediately();
-			}
-			
-			if(MontageToPlay != nullptr)
-			{
-				UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, MontageToPlay, 1.0f, NAME_None, true, 1.0f, 0.0f);
-				MontageTask->OnBlendOut.AddDynamic(this, &ThisClass::EndAbilityForDelegate);
-				MontageTask->OnInterrupted.AddDynamic(this, &ThisClass::EndAbilityForDelegate);
-				MontageTask->OnCancelled.AddDynamic(this, &ThisClass::EndAbilityForDelegate);
-				MontageTask->OnCompleted.AddDynamic(this, &ThisClass::EndAbilityForDelegate);
-				MontageTask->ReadyForActivation();
-			}
-			
-			ImplementedActors.Empty();
-		}
-	}
-	else
-	{
-		ImplementedActors.Empty();
-		CancelAbility(Handle, ActorInfo, ActivationInfo, false);
-	}
+	CarryBody();
 }
 
 bool UFEGameplayAbility_CarryBody::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -109,7 +40,7 @@ bool UFEGameplayAbility_CarryBody::CanActivateAbility(const FGameplayAbilitySpec
 	{
 		return false;
 	}
-
+	
 	return true;
 }
 
@@ -118,6 +49,17 @@ void UFEGameplayAbility_CarryBody::CancelAbility(const FGameplayAbilitySpecHandl
 	bool bReplicateCancelAbility)
 {
 	EndAbility(Handle, ActorInfo, ActivationInfo, false, true);
+}
+
+void UFEGameplayAbility_CarryBody::InputPressed(const FGameplayAbilitySpecHandle Handle,
+	const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
+{
+	Super::InputPressed(Handle, ActorInfo, ActivationInfo);
+	
+	if(MontageTask->IsFinished())
+	{
+		CarryBody();
+	}
 }
 
 void UFEGameplayAbility_CarryBody::EndAbilityForDelegate()
@@ -142,5 +84,85 @@ void UFEGameplayAbility_CarryBody::EndAbilityForDelegate()
 	Character->GetCharacterMovement()->MaxWalkSpeedCrouched = 300.0f;
 	Character->GetCharacterMovement()->RotationRate = FRotator(0.0f, 600.0f, 0.0f);
 	Character->MotionWarpingComponent->RemoveWarpTarget(TEXT("Body"));
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
+
+	if(!Character->bIsCarryingBody)
+	{
+		EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);	
+	}
+}
+
+void UFEGameplayAbility_CarryBody::CarryBody()
+{
+	AFEPlayerCharacter* Character = CastChecked<AFEPlayerCharacter>(CurrentActorInfo->AvatarActor.Get());
+	if(Character == nullptr)
+	{
+		return;
+	}
+	
+	TArray<AActor*> OverlappingActors;
+	TArray<AActor*> ImplementedActors;
+	Character->GetOverlappingActors(OverlappingActors);
+	for (AActor* OverlappingActor : OverlappingActors)
+	{
+		IFEI_CarryBody* CarryBodyInterface = Cast<IFEI_CarryBody>(OverlappingActor);
+		if(CarryBodyInterface != nullptr)
+		{
+			ImplementedActors.Add(OverlappingActor);
+		}
+	}
+	
+	if(ImplementedActors.Num() > 0)
+	{
+		if(!Character->bIsCarryingBody)
+		{
+			AICharacter = Cast<AFEAICharacterBase>(ImplementedActors.Top());
+		}
+		
+		if(AICharacter != nullptr)
+		{
+			if(!AICharacter->bIsDead)
+			{
+				CancelAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, false);
+				return;
+			}
+			
+			FVector Location;
+			FRotator Rotation;
+
+			Character->GetCharacterMovement()->MaxWalkSpeedCrouched = 0.0f;
+			Character->GetCharacterMovement()->RotationRate = FRotator(0.0f, 0.0f, 0.0f);
+			if(!AICharacter->bIsCarried && !Character->bIsCarryingBody)
+			{
+				AICharacter->CarriedByPlayer(Location, Rotation);
+				Character->MotionWarpingComponent->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("Body"), Location, Rotation);
+				MontageToPlay = Character->CarryBodyMontage;
+				Character->bIsCarryingBody = true;
+				Character->Crouch();
+			}
+			else
+			{
+				AICharacter->DroppedByPlayer(Location, Rotation);
+				MontageToPlay = Character->DropBodyMontage;  
+				Character->bIsCarryingBody = false;
+				Character->GetCharacterMovement()->StopMovementImmediately();
+			}
+			
+			if(MontageToPlay != nullptr)
+			{
+				MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, MontageToPlay, 1.0f, NAME_None, true, 1.0f, 0.0f);
+				MontageTask->OnBlendOut.AddDynamic(this, &ThisClass::EndAbilityForDelegate);
+				MontageTask->OnInterrupted.AddDynamic(this, &ThisClass::EndAbilityForDelegate);
+				MontageTask->OnCancelled.AddDynamic(this, &ThisClass::EndAbilityForDelegate);
+				MontageTask->OnCompleted.AddDynamic(this, &ThisClass::EndAbilityForDelegate);
+				MontageTask->ReadyForActivation();
+			}
+			
+			ImplementedActors.Empty();
+		}
+	}
+	else
+	{
+		ImplementedActors.Empty();
+		CancelAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, false);
+	}
 }

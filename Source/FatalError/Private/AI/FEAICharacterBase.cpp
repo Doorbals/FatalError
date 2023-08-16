@@ -54,7 +54,7 @@ bool AFEAICharacterBase::CanBeSeenFrom(const FVector& ObserverLocation, FVector&
 		{
 			static const FName NAME_LineOfSight = FName(TEXT("LineOfSight"));
 			FHitResult HitResult;
-	 
+
 			// ActorLocation으로 트레이스 발사
 			const bool bHit = GetWorld()->LineTraceSingleByObjectType(HitResult, ObserverLocation, GetActorLocation()
 				, FCollisionObjectQueryParams(ECC_TO_BITFIELD(ECC_WorldStatic) | ECC_TO_BITFIELD(ECC_WorldDynamic) | ECC_TO_BITFIELD(ECC_Pawn)) 

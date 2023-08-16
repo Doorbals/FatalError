@@ -20,7 +20,7 @@ private:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 	
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<ACharacter> Character;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
